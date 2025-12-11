@@ -12,6 +12,10 @@ func NewBuy(unitCost UnitCost, quantity Quantity) Buy {
 	}
 }
 
+func (buy Buy) UnitCost() UnitCost {
+	return buy.unitCost
+}
+
 func (buy Buy) Quantity() Quantity {
 	return buy.quantity
 }
@@ -31,5 +35,6 @@ func (buy Buy) CalculateWeightedAverageUnitCost(existingQuantity Quantity, exist
 	}
 
 	averageCostValue := combinedTotalCost.ToFloat64() / combinedQuantity.ToFloat64()
+
 	return NewUnitCost(averageCostValue)
 }

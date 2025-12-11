@@ -1,17 +1,25 @@
 package models
 
 type UnitCost struct {
-	value float64
+	value MonetaryValue
 }
 
 func NewUnitCost(value float64) UnitCost {
-	return UnitCost{value: value}
+	return UnitCost{
+		value: NewMonetaryValue(value),
+	}
+}
+
+func (unitCost UnitCost) Value() MonetaryValue {
+	return unitCost.value
 }
 
 func (unitCost UnitCost) Subtract(other UnitCost) UnitCost {
-	return NewUnitCost(unitCost.value - other.value)
+	value := unitCost.value.Subtract(other.value)
+
+	return NewUnitCost(value.ToFloat64())
 }
 
 func (unitCost UnitCost) MultiplyBy(quantity Quantity) MonetaryValue {
-	return NewMonetaryValue(unitCost.value * quantity.ToFloat64())
+	return unitCost.value.MultiplyBy(quantity.ToFloat64())
 }

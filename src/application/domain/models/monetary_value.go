@@ -1,9 +1,15 @@
 package models
 
+const zero float64 = 0.00
+
 type MonetaryValue float64
 
 func NewMonetaryValue(value float64) MonetaryValue {
 	return MonetaryValue(value)
+}
+
+func NewZeroMonetaryValue() MonetaryValue {
+	return MonetaryValue(zero)
 }
 
 func (monetaryValue MonetaryValue) Add(other MonetaryValue) MonetaryValue {
@@ -19,15 +25,15 @@ func (monetaryValue MonetaryValue) MultiplyBy(factor float64) MonetaryValue {
 }
 
 func (monetaryValue MonetaryValue) IsZero() bool {
-	return monetaryValue == 0
+	return monetaryValue.ToFloat64() == zero
 }
 
 func (monetaryValue MonetaryValue) IsPositive() bool {
-	return monetaryValue > 0
+	return monetaryValue.ToFloat64() > zero
 }
 
 func (monetaryValue MonetaryValue) IsNegative() bool {
-	return monetaryValue < 0
+	return monetaryValue.ToFloat64() < zero
 }
 
 func (monetaryValue MonetaryValue) IsLessThan(other MonetaryValue) bool {

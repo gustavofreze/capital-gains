@@ -1,40 +1,35 @@
 package models
 
 type Buy struct {
-	unitCost UnitCost
 	quantity Quantity
+	unitCost MonetaryValue
 }
 
-func NewBuy(unitCost UnitCost, quantity Quantity) Buy {
+func NewBuy(quantity Quantity, unitCost MonetaryValue) Buy {
 	return Buy{
-		unitCost: unitCost,
 		quantity: quantity,
+		unitCost: unitCost,
 	}
-}
-
-func (buy Buy) UnitCost() UnitCost {
-	return buy.unitCost
 }
 
 func (buy Buy) Quantity() Quantity {
 	return buy.quantity
 }
 
-func (buy Buy) TotalCost() MonetaryValue {
-	return buy.unitCost.MultiplyBy(buy.quantity)
+func (buy Buy) TotalValue() MonetaryValue {
+	return buy.unitCost.MultiplyBy(buy.quantity.ToFloat())
 }
 
-func (buy Buy) CalculateWeightedAverageUnitCost(existingQuantity Quantity, existingUnitCost UnitCost) UnitCost {
-	newTotalCost := buy.TotalCost()
-	combinedQuantity := existingQuantity.Add(buy.quantity)
-	existingTotalCost := existingUnitCost.MultiplyBy(existingQuantity)
-	combinedTotalCost := existingTotalCost.Add(newTotalCost)
+func (buy Buy) CalculateWeightedAverageUnitCost(quantity Quantity, unitCost MonetaryValue) MonetaryValue {
+	totalCost := unitCost.MultiplyBy(quantity.ToFloat())
+	combinedQuantity := quantity.Add(buy.quantity)
+	combinedTotalCost := totalCost.Add(buy.TotalValue())
 
 	if combinedQuantity.IsZero() {
-		return NewUnitCost(0)
+		return NewZeroMonetaryValue()
 	}
 
-	averageCostValue := combinedTotalCost.ToFloat64() / combinedQuantity.ToFloat64()
+	averageCostValue := combinedTotalCost.ToFloat64() / float64(combinedQuantity.ToInt())
 
-	return NewUnitCost(averageCostValue)
+	return NewMonetaryValue(averageCostValue)
 }

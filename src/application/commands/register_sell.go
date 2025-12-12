@@ -1,21 +1,23 @@
 package commands
 
+var _ Command = (*RegisterSell)(nil)
+
 type RegisterSell struct {
+	quantity int
 	unitCost float64
-	quantity int64
 }
 
-func NewRegisterSell(unitCost float64, quantity int64) RegisterSell {
+func NewRegisterSell(quantity int, unitCost float64) Command {
 	return RegisterSell{
-		unitCost: unitCost,
 		quantity: quantity,
+		unitCost: unitCost,
 	}
+}
+
+func (command RegisterSell) Quantity() int {
+	return command.quantity
 }
 
 func (command RegisterSell) UnitCost() float64 {
 	return command.unitCost
-}
-
-func (command RegisterSell) Quantity() int64 {
-	return command.quantity
 }

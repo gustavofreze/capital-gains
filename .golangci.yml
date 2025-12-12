@@ -1,0 +1,23 @@
+version: "2"
+
+run:
+  tests: true
+  timeout: 5m
+  concurrency: 4
+
+issues:
+  max-same-issues: 0
+  max-issues-per-linter: 0
+
+linters:
+  enable:
+    - govet            # Finds suspicious constructs and common bugs using Go vet.
+    - gosec            # Detects security issues, vulnerable patterns and risky APIs.
+    - unused           # Reports unused variables, constants, functions and imports.
+    - funlen           # Limits function length to encourage smaller, focused functions.
+    - depguard         # Enforces import rules to keep package/architecture boundaries.
+    - goconst          # Promotes extracting repeated literals into named constants.
+    - errcheck         # Ensures all returned errors are properly checked/handled.
+    - staticcheck      # Advanced static analysis for bugs, performance and style.
+    - gochecknoinits   # Discourages use of init() functions for clearer program flow.
+    - gochecknoglobals # Discourages global variables to improve encapsulation.

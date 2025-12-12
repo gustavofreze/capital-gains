@@ -41,7 +41,12 @@ test: ## Run tests with coverage
 
 .PHONY: review
 review: ## Run static code analysis
-	@${DOCKER_RUN}
+	@docker run ${PLATFORM} --rm -it \
+		-v ${PWD}:/app \
+		-w /app \
+		golangci/golangci-lint:latest-alpine \
+		golangci-lint run ./src/...
+
 
 .PHONY: show-reports
 show-reports: ## Open static analysis reports (e.g., coverage, lints) in the browser

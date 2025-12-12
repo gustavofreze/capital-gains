@@ -1,18 +1,20 @@
 package models
 
-const TaxRate = 0.20
-const TaxFreeThreshold MonetaryValue = 20000.00
+const (
+	TaxRate                        = 0.20
+	TaxFreeThreshold MonetaryValue = 20000.00
+)
 
 type Position struct {
 	quantity        Quantity
-	averageUnitCost UnitCost
+	averageUnitCost MonetaryValue
 	accumulatedLoss MonetaryValue
 }
 
 func NewPosition() Position {
 	return Position{
 		quantity:        NewQuantity(0),
-		averageUnitCost: NewUnitCost(0.00),
+		averageUnitCost: NewZeroMonetaryValue(),
 		accumulatedLoss: NewZeroMonetaryValue(),
 	}
 }
@@ -23,7 +25,7 @@ func (position *Position) ApplyBuy(buy Buy) {
 }
 
 func (position *Position) ApplySell(sell Sell) MonetaryValue {
-	totalProceeds := sell.TotalProceeds()
+	totalProceeds := sell.TotalValue()
 	grossCapitalGain := sell.CalculateGrossCapitalGain(position.averageUnitCost)
 
 	if grossCapitalGain.IsNegative() {
@@ -58,20 +60,8 @@ func (position *Position) ApplySell(sell Sell) MonetaryValue {
 	position.quantity = position.quantity.Subtract(sell.Quantity())
 
 	if position.quantity.IsZero() {
-		position.averageUnitCost = NewUnitCost(0)
+		position.averageUnitCost = NewZeroMonetaryValue()
 	}
 
 	return taxAmount
-}
-
-func (position *Position) Quantity() Quantity {
-	return position.quantity
-}
-
-func (position *Position) AverageUnitCost() UnitCost {
-	return position.averageUnitCost
-}
-
-func (position *Position) AccumulatedLoss() MonetaryValue {
-	return position.accumulatedLoss
 }

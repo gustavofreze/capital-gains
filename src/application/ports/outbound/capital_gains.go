@@ -10,8 +10,7 @@ type CapitalGains interface {
 	// current calculation lifecycle.
 	//
 	// [param]  capitalGain models.CapitalGain   aggregate instance to be stored.
-	// [return] error                            non-nil error if the aggregate cannot be stored.
-	Save(capitalGain models.CapitalGain) error
+	Save(capitalGain models.CapitalGain)
 
 	// FindAll returns all stored CapitalGain aggregates.
 	//

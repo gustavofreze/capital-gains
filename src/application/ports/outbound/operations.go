@@ -8,8 +8,7 @@ type Operations interface {
 	// Save persists a new market operation in the current calculation context.
 	//
 	// [param]  operation models.Operation      instance to be stored.
-	// [return] error                           non-nil error if the operation cannot be stored.
-	Save(operation models.Operation) error
+	Save(operation models.Operation)
 
 	// FindAll returns all stored market operations in the order they were added,
 	// to be processed by the capital gain aggregate.

@@ -1,5 +1,7 @@
 package models
 
+import "math"
+
 const zero float64 = 0.00
 
 type MonetaryValue float64
@@ -49,11 +51,7 @@ func (monetaryValue MonetaryValue) IsGreaterThanOrEqual(other MonetaryValue) boo
 }
 
 func (monetaryValue MonetaryValue) AbsoluteValue() MonetaryValue {
-	if monetaryValue.IsNegative() {
-		return NewMonetaryValue(-float64(monetaryValue))
-	}
-
-	return monetaryValue
+	return NewMonetaryValue(math.Abs(monetaryValue.ToFloat64()))
 }
 
 func (monetaryValue MonetaryValue) ToFloat64() float64 {

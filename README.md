@@ -62,19 +62,42 @@ Run the CLI reading operations from `stdin` and writing the JSON result to `stdo
 make calculate < use_case.txt
 ```
 
+Example use_case.txt:
+
+```json
+[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
+{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]
+```
+
 You can also paste input directly:
 
 ```bash
-echo '[{"operation":"buy","unit-cost":10.00,"quantity":100},{"operation":"sell","unit-cost":12.00,"quantity":50}]' | make calculate
+make calculate <<< '[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
+{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]'
 ```
 
 or
 
 ```bash
 make calculate << 'EOF'
-[{"operation":"buy","unit-cost":10.00,"quantity":100},{"operation":"sell","unit-cost":12.00,"quantity":50}]
+[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
+{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]
 EOF
 ```
+
+All examples above will produce the same result:
+
+```json
+[{"tax":0.00},{"tax":80000.00},{"tax":0.00},{"tax":60000.00}]
+```
+
+For more details, see the [Use cases](docs/USE_CASES.md) documentation.
 
 <div id='tests'></div> 
 

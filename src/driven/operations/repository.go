@@ -25,5 +25,7 @@ func (repository *Repository) FindAll() []models.Operation {
 	operations := make([]models.Operation, len(repository.operations))
 	copy(operations, repository.operations)
 
+	repository.operations = make([]models.Operation, 0)
+
 	return operations
 }

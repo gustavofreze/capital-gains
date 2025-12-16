@@ -12,24 +12,8 @@ func NewBuy(quantity Quantity, unitCost MonetaryValue) Buy {
 	}
 }
 
-func (buy Buy) Quantity() Quantity {
-	return buy.quantity
-}
+func (buy Buy) ApplyTo(position *Position) Tax {
+	position.Buy(buy.quantity, buy.unitCost)
 
-func (buy Buy) TotalValue() MonetaryValue {
-	return buy.unitCost.MultiplyBy(buy.quantity.ToFloat())
-}
-
-func (buy Buy) CalculateWeightedAverageUnitCost(quantity Quantity, unitCost MonetaryValue) MonetaryValue {
-	totalCost := unitCost.MultiplyBy(quantity.ToFloat())
-	combinedQuantity := quantity.Add(buy.quantity)
-	combinedTotalCost := totalCost.Add(buy.TotalValue())
-
-	if combinedQuantity.IsZero() {
-		return NewZeroMonetaryValue()
-	}
-
-	averageCostValue := combinedTotalCost.ToFloat64() / float64(combinedQuantity.ToInt())
-
-	return NewMonetaryValue(averageCostValue)
+	return NewTax(NewZeroMonetaryValue())
 }

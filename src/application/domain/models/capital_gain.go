@@ -7,7 +7,7 @@ type CapitalGain struct {
 	position Position
 }
 
-func NewCapitalGains() CapitalGain {
+func NewCapitalGain() CapitalGain {
 	return CapitalGain{
 		events:   make([]events.Event, 0),
 		position: NewPosition(),
@@ -15,30 +15,18 @@ func NewCapitalGains() CapitalGain {
 }
 
 func (capitalGain *CapitalGain) ApplyOperations(operations []Operation) {
-	for _, capitalGainOperation := range operations {
-		buyOperation, isBuyOperation := capitalGainOperation.(Buy)
+	for _, operation := range operations {
+		tax := operation.ApplyTo(&capitalGain.position)
 
-		if isBuyOperation {
-			capitalGain.position.ApplyBuy(buyOperation)
-			taxEvent := events.NewTaxExempted()
-			capitalGain.events = append(capitalGain.events, taxEvent)
+		if tax.IsExempted() {
+			capitalGain.events = append(capitalGain.events, events.NewTaxExempted())
 			continue
 		}
 
-		sellOperation, isSellOperation := capitalGainOperation.(Sell)
-
-		if isSellOperation {
-			taxAmount := capitalGain.position.ApplySell(sellOperation)
-
-			if taxAmount.IsZero() {
-				taxEvent := events.NewTaxExempted()
-				capitalGain.events = append(capitalGain.events, taxEvent)
-				continue
-			}
-
-			taxEvent := events.NewTaxPaid(taxAmount.ToFloat64())
-			capitalGain.events = append(capitalGain.events, taxEvent)
-		}
+		capitalGain.events = append(
+			capitalGain.events,
+			events.NewTaxPaid(tax.Value().ToFloat64()),
+		)
 	}
 }
 

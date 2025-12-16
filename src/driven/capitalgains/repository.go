@@ -1,11 +1,6 @@
-package capital_gains
+package capitalgains
 
-import (
-	"capital-gains/src/application/domain/models"
-	"capital-gains/src/application/ports/outbound"
-)
-
-var _ outbound.CapitalGains = (*Repository)(nil)
+import "capital-gains/src/application/domain/models"
 
 type Repository struct {
 	capitalGains []models.CapitalGain
@@ -24,6 +19,8 @@ func (repository *Repository) Save(capitalGain models.CapitalGain) {
 func (repository *Repository) FindAll() []models.CapitalGain {
 	capitalGains := make([]models.CapitalGain, len(repository.capitalGains))
 	copy(capitalGains, repository.capitalGains)
+
+	repository.capitalGains = make([]models.CapitalGain, 0)
 
 	return capitalGains
 }

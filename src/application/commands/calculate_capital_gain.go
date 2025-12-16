@@ -4,6 +4,6 @@ var _ Command = (*CalculateCapitalGain)(nil)
 
 type CalculateCapitalGain struct{}
 
-func NewCalculateCapitalGain() Command {
+func NewCalculateCapitalGain() CalculateCapitalGain {
 	return CalculateCapitalGain{}
 }

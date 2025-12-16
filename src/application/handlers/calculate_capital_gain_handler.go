@@ -3,11 +3,8 @@ package handlers
 import (
 	"capital-gains/src/application/commands"
 	"capital-gains/src/application/domain/models"
-	"capital-gains/src/application/ports/inbound"
 	"capital-gains/src/application/ports/outbound"
 )
-
-var _ inbound.CommandHandler = (*CalculateCapitalGainHandler)(nil)
 
 type CalculateCapitalGainHandler struct {
 	operations   outbound.Operations
@@ -24,13 +21,11 @@ func NewCalculateCapitalGainHandler(
 	}
 }
 
-func (handler CalculateCapitalGainHandler) Handle(command commands.Command) error {
-	_ = command.(commands.CalculateCapitalGain)
+func (handler CalculateCapitalGainHandler) Handle(_ commands.CalculateCapitalGain) {
 	operations := handler.operations.FindAll()
 
-	capitalGain := models.NewCapitalGains()
+	capitalGain := models.NewCapitalGain()
 	capitalGain.ApplyOperations(operations)
 
 	handler.capitalGains.Save(capitalGain)
-	return nil
 }

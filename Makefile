@@ -16,11 +16,11 @@ IMAGE = golang:1.25-alpine
 GO_CACHE     := $(PWD)/.cache/go/build
 GO_MOD_CACHE := $(PWD)/.cache/go/pkg/mod
 
-DOCKER_RUN = docker run ${PLATFORM} --rm -it \
-	-v ${PWD}:/app \
-	-v ${GO_CACHE}:/root/.cache/go-build \
-	-v ${GO_MOD_CACHE}:/go/pkg/mod \
-	-w /app ${IMAGE} sh -c
+DOCKER_RUN = docker run ${PLATFORM} --rm -t \
+    -v ${PWD}:/app \
+    -v ${GO_MOD_CACHE}:/go/pkg/mod \
+    -v ${GO_CACHE}:/root/.cache/go-build \
+    -w /app ${IMAGE} sh -c
 
 .DEFAULT_GOAL := help
 
@@ -36,7 +36,7 @@ configure: clean ## Configure development environment
 test: ## Run tests with coverage
 	@mkdir -p reports/coverage \
 		&& ${DOCKER_RUN} "go test -p=12 -parallel=6 \
-			-coverprofile=reports/coverage/coverage.out -covermode=atomic ./src/application/... \
+			-coverprofile=reports/coverage/coverage.out -covermode=atomic ./src/application/... ./src/driver/... \
 			&& go tool cover -html=reports/coverage/coverage.out -o reports/coverage/coverage.html"
 
 .PHONY: review
@@ -44,17 +44,20 @@ review: ## Run static code analysis
 	@docker run ${PLATFORM} --rm -it \
 		-v ${PWD}:/app \
 		-w /app \
-		golangci/golangci-lint:latest-alpine \
+		golangci/golangci-lint:v2.7-alpine \
 		golangci-lint run ./src/...
-
 
 .PHONY: show-reports
 show-reports: ## Open static analysis reports (e.g., coverage, lints) in the browser
 	@sensible-browser reports/coverage/coverage.html
 
-.PHONY: run
-run: ## Run the application
-	@${DOCKER_RUN} "go run src/main.go"
+.PHONY: calculate
+calculate: ## Execute the capital gains calculation use case reading operations from stdin (supports input redirection)
+	@docker run ${PLATFORM} --rm -i \
+    	-v ${PWD}:/app \
+    	-v ${GO_MOD_CACHE}:/go/pkg/mod \
+    	-v ${GO_CACHE}:/root/.cache/go-build \
+    	-w /app ${IMAGE} sh -c 'go run src/main.go'
 
 .PHONY: clean
 clean: ## Remove dependencies and generated artifacts
@@ -66,7 +69,7 @@ help: ## Display this help message
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Setup and run"
-	@grep -E '^(configure|run):.*?## .*$$' $(MAKEFILE_LIST) \
+	@grep -E '^(configure|calculate):.*?## .*$$' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Testing"

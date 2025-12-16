@@ -12,17 +12,8 @@ func NewSell(quantity Quantity, unitCost MonetaryValue) Sell {
 	}
 }
 
-func (sell Sell) Quantity() Quantity {
-	return sell.quantity
-}
+func (sell Sell) ApplyTo(position *Position) Tax {
+	value := position.Sell(sell.quantity, sell.unitCost)
 
-func (sell Sell) TotalValue() MonetaryValue {
-	return sell.unitCost.MultiplyBy(sell.quantity.ToFloat())
-}
-
-func (sell Sell) CalculateGrossCapitalGain(averageUnitCost MonetaryValue) MonetaryValue {
-	value := sell.unitCost.Subtract(averageUnitCost)
-	product := value.MultiplyBy(sell.quantity.ToFloat())
-
-	return product
+	return NewTax(value)
 }

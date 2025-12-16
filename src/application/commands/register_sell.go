@@ -7,7 +7,7 @@ type RegisterSell struct {
 	unitCost float64
 }
 
-func NewRegisterSell(quantity int, unitCost float64) Command {
+func NewRegisterSell(quantity int, unitCost float64) RegisterSell {
 	return RegisterSell{
 		quantity: quantity,
 		unitCost: unitCost,

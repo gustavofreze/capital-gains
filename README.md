@@ -26,8 +26,9 @@ share quantity, weighted-average unit cost, and accumulated losses.
 
 ### Use cases
 
-- [Buying](docs/USE_CASES.md#buying)
-- [Selling](docs/USE_CASES.md#selling)
+- [Register buy](docs/USE_CASES.md#register-buy)
+- [Register sell](docs/USE_CASES.md#register-sell)
+- [Calculate capital gain](docs/USE_CASES.md#calculate-capital-gain)
 
 <div id='installation'></div> 
 
@@ -51,6 +52,23 @@ To install project dependencies locally, run:
 
 ```bash
 make configure
+```
+
+### Execution
+
+Run the CLI reading operations from `stdin` and writing the JSON result to `stdout`:
+
+```bash
+make calculate < use_case.txt
+```
+
+You can also paste input directly:
+
+```bash
+make calculate << 'EOF'
+[{"operation":"buy","unit-cost":10.00,"quantity":100},{"operation":"sell","unit-cost":12.00,"quantity":50}]
+
+EOF
 ```
 
 <div id='tests'></div> 

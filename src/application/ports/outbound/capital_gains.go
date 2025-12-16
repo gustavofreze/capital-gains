@@ -12,7 +12,8 @@ type CapitalGains interface {
 	// [param]  capitalGain models.CapitalGain   aggregate instance to be stored.
 	Save(capitalGain models.CapitalGain)
 
-	// FindAll returns all stored CapitalGain aggregates.
+	// FindAll returns all stored CapitalGain aggregates and clears the storage,
+	// so a subsequent call returns an empty list.
 	//
 	// [return] []models.CapitalGain            list of stored aggregates.
 	FindAll() []models.CapitalGain

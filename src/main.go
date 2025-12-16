@@ -1,5 +1,8 @@
 package main
 
+import "capital-gains/src/starter"
+
 func main() {
-	println("Hello, World!")
+	dependencies := starter.NewDependencies()
+	dependencies.CalculateCapitalGain.Handle()
 }

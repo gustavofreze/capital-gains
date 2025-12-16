@@ -6,7 +6,7 @@ import (
 
 	"capital-gains/src/application/commands"
 	"capital-gains/src/application/handlers"
-	"capital-gains/src/driven/capital_gains"
+	"capital-gains/src/driven/capitalgains"
 	"capital-gains/src/driven/operations"
 
 	"github.com/stretchr/testify/assert"
@@ -24,14 +24,14 @@ func TestCalculateCapitalGainHandlerGivenRegisteredOperationsWhenHandleThenCapit
 
 	// And I register a buy operation of 10000 units at 10.00
 	buyCommand := commands.NewRegisterBuy(10000, 10.00)
-	_ = registerBuyHandler.Handle(buyCommand)
+	registerBuyHandler.Handle(buyCommand)
 
 	// And I register a sell operation of 5000 units at 20.00
 	sellCommand := commands.NewRegisterSell(5000, 20.00)
-	_ = registerSellHandler.Handle(sellCommand)
+	registerSellHandler.Handle(sellCommand)
 
 	// And I have a configured capital gain repository
-	capitalGainRepository := capital_gains.NewRepository()
+	capitalGainRepository := capitalgains.NewRepository()
 
 	// And I have a handler to calculate the capital gain using the registered operations
 	calculateHandler := handlers.NewCalculateCapitalGainHandler(operationsRepository, capitalGainRepository)
@@ -40,12 +40,9 @@ func TestCalculateCapitalGainHandlerGivenRegisteredOperationsWhenHandleThenCapit
 	calculateCommand := commands.NewCalculateCapitalGain()
 
 	// When I handle the calculate capital gain command
-	err := calculateHandler.Handle(calculateCommand)
+	calculateHandler.Handle(calculateCommand)
 
-	// Then I expect no error
-	assert.NoError(t, err)
-
-	// And I expect one capital gain result to be stored in the capital gain repository
+	// Then I expect one capital gain result to be stored in the capital gain repository
 	capitalGains := capitalGainRepository.FindAll()
 
 	assert.Len(t, capitalGains, 1)
@@ -57,8 +54,8 @@ func TestCalculateCapitalGainHandlerGivenRegisteredOperationsWhenHandleThenCapit
 	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
 
 	expectedTaxAmounts := []float64{
-		0.0,     // buy
-		10000.0, // sell
+		0.00,     // buy
+		10000.00, // sell
 	}
 
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)

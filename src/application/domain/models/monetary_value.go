@@ -2,44 +2,43 @@ package models
 
 import "math"
 
-const zero float64 = 0.00
-
 type MonetaryValue float64
 
+const (
+	monetaryScale                   = 100.00
+	zeroMonetaryValue MonetaryValue = 0.00
+)
+
 func NewMonetaryValue(value float64) MonetaryValue {
-	return MonetaryValue(value)
+	return MonetaryValue(roundToTwoDecimalPlaces(value))
 }
 
 func NewZeroMonetaryValue() MonetaryValue {
-	return MonetaryValue(zero)
+	return zeroMonetaryValue
 }
 
 func (monetaryValue MonetaryValue) Add(other MonetaryValue) MonetaryValue {
-	return monetaryValue + other
+	return NewMonetaryValue(monetaryValue.ToFloat64() + other.ToFloat64())
 }
 
 func (monetaryValue MonetaryValue) Subtract(other MonetaryValue) MonetaryValue {
-	return monetaryValue - other
+	return NewMonetaryValue(monetaryValue.ToFloat64() - other.ToFloat64())
 }
 
 func (monetaryValue MonetaryValue) MultiplyBy(factor float64) MonetaryValue {
-	return MonetaryValue(float64(monetaryValue) * factor)
+	return NewMonetaryValue(monetaryValue.ToFloat64() * factor)
 }
 
 func (monetaryValue MonetaryValue) IsZero() bool {
-	return monetaryValue.ToFloat64() == zero
+	return monetaryValue == zeroMonetaryValue
 }
 
 func (monetaryValue MonetaryValue) IsPositive() bool {
-	return monetaryValue.ToFloat64() > zero
+	return monetaryValue > 0
 }
 
 func (monetaryValue MonetaryValue) IsNegative() bool {
-	return monetaryValue.ToFloat64() < zero
-}
-
-func (monetaryValue MonetaryValue) IsLessThan(other MonetaryValue) bool {
-	return monetaryValue < other
+	return monetaryValue < 0
 }
 
 func (monetaryValue MonetaryValue) IsGreaterThan(other MonetaryValue) bool {
@@ -55,5 +54,9 @@ func (monetaryValue MonetaryValue) AbsoluteValue() MonetaryValue {
 }
 
 func (monetaryValue MonetaryValue) ToFloat64() float64 {
-	return float64(monetaryValue)
+	return roundToTwoDecimalPlaces(float64(monetaryValue))
+}
+
+func roundToTwoDecimalPlaces(value float64) float64 {
+	return math.Round(value*monetaryScale) / monetaryScale
 }

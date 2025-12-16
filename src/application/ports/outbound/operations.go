@@ -10,9 +10,9 @@ type Operations interface {
 	// [param]  operation models.Operation      instance to be stored.
 	Save(operation models.Operation)
 
-	// FindAll returns all stored market operations in the order they were added,
-	// to be processed by the capital gain aggregate.
+	// FindAll returns all stored Operation aggregates and clears the storage,
+	// so a subsequent call returns an empty list.
 	//
-	// [return] []models.Operation              list of operations registered for the current calculation.
+	// [return] []models.Operation            list of stored aggregates.
 	FindAll() []models.Operation
 }

@@ -49,7 +49,7 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           args: --config=.golangci.yml --timeout=5m
-          version: v2.7-alpine
+          version: v2.7.5
 
   tests:
     name: Tests

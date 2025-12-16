@@ -14,14 +14,14 @@ type CalculateCapitalGainHandler struct {
 func NewCalculateCapitalGainHandler(
 	operations outbound.Operations,
 	capitalGains outbound.CapitalGains,
-) CalculateCapitalGainHandler {
-	return CalculateCapitalGainHandler{
+) *CalculateCapitalGainHandler {
+	return &CalculateCapitalGainHandler{
 		operations:   operations,
 		capitalGains: capitalGains,
 	}
 }
 
-func (handler CalculateCapitalGainHandler) Handle(_ commands.CalculateCapitalGain) {
+func (handler *CalculateCapitalGainHandler) Handle(_ commands.CalculateCapitalGain) {
 	operations := handler.operations.FindAll()
 
 	capitalGain := models.NewCapitalGain()

@@ -2,6 +2,7 @@
 * [Register sell](#register_sell)
 * [Calculate capital gain](#calculate_capital_gain)
 * [FAQ](#faq)
+* [Reference](#reference)
 
 <div id='register_buy'></div>
 
@@ -229,3 +230,9 @@ Yes. You may assume input lines follow the contract and will not break parsing.
 ### Can the program print other messages?
 
 No. The program must print only the JSON outputs (no prompts, logs, or explanatory text).
+
+<div id='reference'></div>
+
+## Reference
+
+[Code Challenge: Capital Gains](code_challenge_ptbr.pdf)

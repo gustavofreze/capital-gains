@@ -10,13 +10,13 @@ type RegisterSellHandler struct {
 	operations outbound.Operations
 }
 
-func NewRegisterSellHandler(operations outbound.Operations) RegisterSellHandler {
-	return RegisterSellHandler{
+func NewRegisterSellHandler(operations outbound.Operations) *RegisterSellHandler {
+	return &RegisterSellHandler{
 		operations: operations,
 	}
 }
 
-func (handler RegisterSellHandler) Handle(command commands.RegisterSell) {
+func (handler *RegisterSellHandler) Handle(command commands.RegisterSell) {
 	quantity := models.NewQuantity(command.Quantity())
 	unitCost := models.NewMonetaryValue(command.UnitCost())
 

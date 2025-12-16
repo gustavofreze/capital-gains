@@ -65,7 +65,7 @@ make calculate < use_case.txt
 You can also paste input directly:
 
 ```bash
-echo '[{"operation":"buy","unit-cost":10.0,"quantity":100}]' | make calculate
+echo '[{"operation":"buy","unit-cost":10.00,"quantity":100},{"operation":"sell","unit-cost":12.00,"quantity":50}]' | make calculate
 ```
 
 or

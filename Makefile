@@ -27,10 +27,10 @@ DOCKER_RUN = docker run ${PLATFORM} --rm -t \
 .PHONY: configure
 configure: ## Configure development environment
 	@mkdir -p .cache/go/build .cache/go/pkg/mod
-	@${DOCKER_RUN} "go mod init capital-gains \
-		&& go get -u -t ./... \
-    	&& go mod tidy \
-    	&& go mod vendor"
+	@${DOCKER_RUN} 'test -f go.mod || go mod init capital-gains; \
+		go get -u -t ./... && \
+		go mod tidy && \
+		go mod vendor'
 
 .PHONY: test
 test: ## Run tests with coverage

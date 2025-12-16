@@ -25,7 +25,7 @@ DOCKER_RUN = docker run ${PLATFORM} --rm -t \
 .DEFAULT_GOAL := help
 
 .PHONY: configure
-configure: clean ## Configure development environment
+configure: ## Configure development environment
 	@mkdir -p .cache/go/build .cache/go/pkg/mod
 	@${DOCKER_RUN} "go mod init capital-gains \
 		&& go get -u -t ./... \

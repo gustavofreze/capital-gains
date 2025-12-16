@@ -2,6 +2,7 @@ version: "2"
 
 run:
   tests: true
+  timeout: 3m
   concurrency: 4
 
 formatters:
@@ -46,9 +47,9 @@ linters:
     goconst:
       min-len: 3
       min-occurrences: 3
-    depguard: # Protect the domain layer from importing non-domain packages.
+    depguard:
       rules:
-        domain-strict:
+        domain-strict: # Protect the domain layer from importing non-domain packages.
           list-mode: strict
           files:
             - "src/application/domain/**"

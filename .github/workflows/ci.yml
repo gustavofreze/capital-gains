@@ -48,7 +48,7 @@ jobs:
       - name: Run review
         uses: golangci/golangci-lint-action@v8
         with:
-          args: --config=.golangci.yml --timeout=3m ./src/...
+          args: --config=.golangci.yml ./src/...
           version: v2.7.2
 
   tests:

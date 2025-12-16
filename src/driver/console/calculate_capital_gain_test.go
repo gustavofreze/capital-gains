@@ -1,13 +1,14 @@
 package console_test
 
 import (
+	"testing"
+
 	"capital-gains/src/application/handlers"
 	"capital-gains/src/driven/capitalgains"
 	"capital-gains/src/driven/operations"
 	"capital-gains/src/driver"
 	"capital-gains/src/driver/console"
 	"capital-gains/test"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 )

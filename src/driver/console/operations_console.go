@@ -1,8 +1,9 @@
 package console
 
 import (
-	"capital-gains/src/driver"
 	"strings"
+
+	"capital-gains/src/driver"
 )
 
 type OperationsConsole struct {

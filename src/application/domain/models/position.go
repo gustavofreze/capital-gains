@@ -1,8 +1,8 @@
 package models
 
 const (
-	TaxRate                        = 0.20
-	TaxFreeThreshold MonetaryValue = 20000.00
+	taxFreeThreshold MonetaryValue = 20000.00
+	taxRate          float64       = 0.20
 )
 
 type Position struct {
@@ -20,27 +20,26 @@ func NewPosition() Position {
 }
 
 func (position *Position) Buy(quantity Quantity, unitCost MonetaryValue) {
-	position.averageUnitCost = position.calculateWeightedAverageUnitCost(quantity, unitCost)
-	position.quantity = position.quantity.Add(quantity)
+	combinedQuantity := position.quantity.Add(quantity)
+
+	if combinedQuantity.IsZero() {
+		position.quantity = combinedQuantity
+		position.averageUnitCost = NewZeroMonetaryValue()
+		return
+	}
+
+	currentTotalCost := position.averageUnitCost.MultiplyBy(position.quantity.ToFloat())
+	buyTotalCost := unitCost.MultiplyBy(quantity.ToFloat())
+	combinedTotalCost := currentTotalCost.Add(buyTotalCost)
+	averageUnitCost := combinedTotalCost.ToFloat64() / float64(combinedQuantity.ToInt())
+
+	position.averageUnitCost = NewMonetaryValue(averageUnitCost)
+	position.quantity = combinedQuantity
 }
 
-func (position *Position) Sell(quantity Quantity, unitCost MonetaryValue) MonetaryValue {
-	totalProceeds := unitCost.MultiplyBy(quantity.ToFloat())
-	grossCapitalGain := unitCost.
-		Subtract(position.averageUnitCost).
-		MultiplyBy(quantity.ToFloat())
-
-	position.updateAccumulatedLossFromGrossGain(grossCapitalGain)
-
-	netCapitalGain := position.calculateNetCapitalGain(grossCapitalGain)
-
-	taxAmount := NewZeroMonetaryValue()
-	hasTaxableProceeds := totalProceeds.IsGreaterThan(TaxFreeThreshold)
-	hasTaxableGain := netCapitalGain.IsPositive()
-
-	if hasTaxableProceeds && hasTaxableGain {
-		taxAmount = netCapitalGain.MultiplyBy(TaxRate)
-	}
+func (position *Position) Sell(quantity Quantity, unitCost MonetaryValue) Tax {
+	proceeds := unitCost.MultiplyBy(quantity.ToFloat())
+	grossCapitalGain := unitCost.Subtract(position.averageUnitCost).MultiplyBy(quantity.ToFloat())
 
 	position.quantity = position.quantity.Subtract(quantity)
 
@@ -48,49 +47,30 @@ func (position *Position) Sell(quantity Quantity, unitCost MonetaryValue) Moneta
 		position.averageUnitCost = NewZeroMonetaryValue()
 	}
 
-	return taxAmount
-}
-
-func (position *Position) calculateWeightedAverageUnitCost(
-	buyQuantity Quantity,
-	buyUnitCost MonetaryValue,
-) MonetaryValue {
-	currentTotalCost := position.averageUnitCost.MultiplyBy(position.quantity.ToFloat())
-	buyTotalCost := buyUnitCost.MultiplyBy(buyQuantity.ToFloat())
-
-	combinedQuantity := position.quantity.Add(buyQuantity)
-	if combinedQuantity.IsZero() {
-		return NewZeroMonetaryValue()
-	}
-
-	combinedTotalCost := currentTotalCost.Add(buyTotalCost)
-	averageCostValue := combinedTotalCost.ToFloat64() / float64(combinedQuantity.ToInt())
-
-	return NewMonetaryValue(averageCostValue)
-}
-
-func (position *Position) updateAccumulatedLossFromGrossGain(grossCapitalGain MonetaryValue) {
 	if grossCapitalGain.IsNegative() {
 		position.accumulatedLoss = position.accumulatedLoss.Add(grossCapitalGain.AbsoluteValue())
-	}
-}
-
-func (position *Position) calculateNetCapitalGain(grossCapitalGain MonetaryValue) MonetaryValue {
-	if !grossCapitalGain.IsPositive() {
-		return NewZeroMonetaryValue()
+		return NewTax(NewZeroMonetaryValue())
 	}
 
-	netCapitalGain := grossCapitalGain
+	if proceeds.IsGreaterThan(taxFreeThreshold) {
+		if grossCapitalGain.IsZero() {
+			return NewTax(NewZeroMonetaryValue())
+		}
 
-	if position.accumulatedLoss.IsGreaterThanOrEqual(netCapitalGain) {
-		position.accumulatedLoss = position.accumulatedLoss.Subtract(netCapitalGain)
-		return NewZeroMonetaryValue()
+		netProfit := grossCapitalGain
+
+		if position.accumulatedLoss.IsGreaterThanOrEqual(netProfit) {
+			position.accumulatedLoss = position.accumulatedLoss.Subtract(netProfit)
+			return NewTax(NewZeroMonetaryValue())
+		}
+
+		if position.accumulatedLoss.IsPositive() {
+			netProfit = netProfit.Subtract(position.accumulatedLoss)
+			position.accumulatedLoss = NewZeroMonetaryValue()
+		}
+
+		return NewTax(netProfit.MultiplyBy(taxRate))
 	}
 
-	if position.accumulatedLoss.IsPositive() {
-		netCapitalGain = netCapitalGain.Subtract(position.accumulatedLoss)
-		position.accumulatedLoss = NewZeroMonetaryValue()
-	}
-
-	return netCapitalGain
+	return NewTax(NewZeroMonetaryValue())
 }

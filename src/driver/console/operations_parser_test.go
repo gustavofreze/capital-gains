@@ -1,8 +1,9 @@
 package console_test
 
 import (
-	"capital-gains/src/driver/console"
 	"testing"
+
+	"capital-gains/src/driver/console"
 
 	"github.com/stretchr/testify/assert"
 )

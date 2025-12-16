@@ -1,8 +1,9 @@
 package handlers_test
 
 import (
-	"capital-gains/src/driven/operations"
 	"testing"
+
+	"capital-gains/src/driven/operations"
 
 	"capital-gains/src/application/commands"
 	"capital-gains/src/application/handlers"

@@ -1,15 +1,16 @@
 package models_test
 
 import (
-	"capital-gains/test"
 	"testing"
+
+	"capital-gains/test"
 
 	"capital-gains/src/application/domain/models"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCapitalGainApplyOperationsGivenProfitsWithProceedsBelowThresholdWhenApplyOperationsThenNoTaxIsCharged(t *testing.T) {
+func TestCapitalGainApplyOperationsGivenTaxFreeProfitSalesBelowThresholdWhenApplyOperationsThenNoTaxIsCharged(t *testing.T) {
 	t.Parallel()
 
 	// Given I start a new capital gain calculation
@@ -64,7 +65,7 @@ func TestCapitalGainApplyOperationsGivenProfitsWithProceedsBelowThresholdWhenApp
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)
 }
 
-func TestCapitalGainApplyOperationsGivenHighProfitThenSubsequentLossWhenApplyOperationsThenOnlyFirstProfitIsTaxed(t *testing.T) {
+func TestCapitalGainApplyOperationsGivenTaxableProfitSaleThenSubsequentLossWhenApplyOperationsThenOnlyFirstSaleIsTaxed(t *testing.T) {
 	t.Parallel()
 
 	// Given I start a new capital gain calculation
@@ -119,7 +120,7 @@ func TestCapitalGainApplyOperationsGivenHighProfitThenSubsequentLossWhenApplyOpe
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)
 }
 
-func TestCapitalGainApplyOperationsGivenLossThenProfitWhenApplyOperationsThenLossIsDeductedFromProfitBeforeTax(t *testing.T) {
+func TestCapitalGainApplyOperationsGivenLossCarryforwardThenTaxableProfitSaleWhenApplyOperationsThenLossIsOffsetBeforeTax(t *testing.T) {
 	t.Parallel()
 
 	// Given I start a new capital gain calculation
@@ -174,7 +175,7 @@ func TestCapitalGainApplyOperationsGivenLossThenProfitWhenApplyOperationsThenLos
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)
 }
 
-func TestCapitalGainApplyOperationsGivenTwoBuysAndSellAtWeightedAverageWhenApplyOperationsThenNoTaxIsCharged(t *testing.T) {
+func TestCapitalGainApplyOperationsGivenWeightedAverageCostThenSellAtAverageWhenApplyOperationsThenNoTaxIsCharged(t *testing.T) {
 	t.Parallel()
 
 	// Given I start a new capital gain calculation
@@ -229,7 +230,7 @@ func TestCapitalGainApplyOperationsGivenTwoBuysAndSellAtWeightedAverageWhenApply
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)
 }
 
-func TestCapitalGainApplyOperationsGivenSellAtAverageThenSellAboveAverageWhenApplyOperationsThenOnlySecondSellIsTaxed(t *testing.T) {
+func TestCapitalGainApplyOperationsGivenSellAtAverageThenTaxableProfitSaleWhenApplyOperationsThenOnlySecondSaleIsTaxed(t *testing.T) {
 	t.Parallel()
 
 	// Given I start a new capital gain calculation
@@ -295,7 +296,7 @@ func TestCapitalGainApplyOperationsGivenSellAtAverageThenSellAboveAverageWhenApp
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)
 }
 
-func TestCapitalGainApplyOperationsGivenMultipleCyclesWithLossCompensationAndThresholdWhenApplyOperationsThenTaxesMatchSpecification(t *testing.T) {
+func TestCapitalGainApplyOperationsGivenOfficialSampleScenariosWhenApplyOperationsThenTaxesMatchSpecification(t *testing.T) {
 	t.Parallel()
 
 	// Given I start a new capital gain calculation
@@ -416,7 +417,7 @@ func TestCapitalGainApplyOperationsGivenMultipleCyclesWithLossCompensationAndThr
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)
 }
 
-func TestCapitalGainApplyOperationsGivenTwoIndependentHighProfitCyclesWhenApplyOperationsThenTaxIsCalculatedForEachCycle(t *testing.T) {
+func TestCapitalGainApplyOperationsGivenTwoTaxableProfitCyclesWhenApplyOperationsThenTaxIsCalculatedForEachCycle(t *testing.T) {
 	t.Parallel()
 
 	// Given I start a new capital gain calculation
@@ -482,7 +483,7 @@ func TestCapitalGainApplyOperationsGivenTwoIndependentHighProfitCyclesWhenApplyO
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)
 }
 
-func TestCapitalGainApplyOperationsGivenZeroQuantityBuyWhenApplyOperationsThenTaxesAreUnaffected(t *testing.T) {
+func TestCapitalGainApplyOperationsGivenZeroQuantityBuyOperationWhenApplyOperationsThenTaxesAreUnaffected(t *testing.T) {
 	t.Parallel()
 
 	// Given I start a new capital gain calculation
@@ -532,6 +533,511 @@ func TestCapitalGainApplyOperationsGivenZeroQuantityBuyWhenApplyOperationsThenTa
 		0.00,     // zero quantity buy does not change the tax
 		0.00,     // regular buy
 		10000.00, // sell above average with proceeds above threshold
+	}
+
+	assert.Equal(t, expectedTaxAmounts, taxAmounts)
+}
+
+func TestCapitalGainApplyOperationsGivenAccumulatedLossThenTaxFreeProfitSaleWhenApplyOperationsThenLossIsPreservedForFutureTaxableSale(t *testing.T) {
+	t.Parallel()
+
+	// Given I start a new capital gain calculation
+	capitalGain := models.NewCapitalGain()
+
+	// And a buy quantity of 1000
+	buyQuantity := models.NewQuantity(1000)
+
+	// And a buy unit cost of 10.00
+	buyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create a buy operation with the buy quantity and buy unit cost
+	firstBuyOperation := models.NewBuy(buyQuantity, buyUnitCost)
+
+	// And a first sell quantity of 500
+	firstSellQuantity := models.NewQuantity(500)
+
+	// And a first sell unit cost of 5.00 (loss of 2500.00)
+	firstSellUnitCost := models.NewMonetaryValue(5.00)
+
+	// And I create the first sell operation with the first sell quantity and first sell unit cost
+	firstSellOperation := models.NewSell(firstSellQuantity, firstSellUnitCost)
+
+	// And a second sell quantity of 500
+	secondSellQuantity := models.NewQuantity(500)
+
+	// And a second sell unit cost of 15.00 (profit of 2500.00, but the proceeds are 7500.00, below the exemption threshold)
+	secondSellUnitCost := models.NewMonetaryValue(15.00)
+
+	// And I create the second sell operation with the second sell quantity and second sell unit cost
+	secondSellOperation := models.NewSell(secondSellQuantity, secondSellUnitCost)
+
+	// And a second buy quantity of 1000
+	secondBuyQuantity := models.NewQuantity(1000)
+
+	// And a second buy unit cost of 10.00
+	secondBuyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create a second buy operation with the second buy quantity and second buy unit cost
+	secondBuyOperation := models.NewBuy(secondBuyQuantity, secondBuyUnitCost)
+
+	// And a third sell quantity of 1000
+	thirdSellQuantity := models.NewQuantity(1000)
+
+	// And a third sell unit cost of 30.00 (profit of 20000.00, proceeds above threshold)
+	thirdSellUnitCost := models.NewMonetaryValue(30.00)
+
+	// And I create the third sell operation with the third sell quantity and third sell unit cost
+	thirdSellOperation := models.NewSell(thirdSellQuantity, thirdSellUnitCost)
+
+	// When I apply all operations
+	operations := []models.Operation{
+		firstBuyOperation,
+		firstSellOperation,
+		secondSellOperation,
+		secondBuyOperation,
+		thirdSellOperation,
+	}
+	capitalGain.ApplyOperations(operations)
+
+	// Then the exempt profit must not reduce the accumulated loss.
+	// So the taxable profit in the last sell is 20000.00 - 2500.00 = 17500.00,
+	// and the tax is 20% of 17500.00 = 3500.00.
+	taxEvents := capitalGain.Events()
+	assert.Len(t, taxEvents, len(operations))
+
+	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
+	expectedTaxAmounts := []float64{
+		0.00,    // first buy
+		0.00,    // first sell (loss)
+		0.00,    // second sell (profit, but exempt by threshold)
+		0.00,    // second buy
+		3500.00, // third sell (taxed, with loss carryforward preserved)
+	}
+
+	assert.Equal(t, expectedTaxAmounts, taxAmounts)
+}
+
+func TestCapitalGainApplyOperationsGivenSaleProceedsEqualToThresholdWhenApplyOperationsThenNoTaxIsCharged(t *testing.T) {
+	t.Parallel()
+
+	// Given I start a new capital gain calculation
+	capitalGain := models.NewCapitalGain()
+
+	// And a buy quantity of 1000
+	buyQuantity := models.NewQuantity(1000)
+
+	// And a buy unit cost of 10.00
+	buyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create a buy operation with the buy quantity and buy unit cost
+	buyOperation := models.NewBuy(buyQuantity, buyUnitCost)
+
+	// And a sell quantity of 1000
+	sellQuantity := models.NewQuantity(1000)
+
+	// And a sell unit cost of 20.00 (proceeds are exactly 20000.00, which is tax-free)
+	sellUnitCost := models.NewMonetaryValue(20.00)
+
+	// And I create a sell operation with the sell quantity and sell unit cost
+	sellOperation := models.NewSell(sellQuantity, sellUnitCost)
+
+	// When I apply the buy and sell operations to the capital gain
+	operations := []models.Operation{
+		buyOperation,
+		sellOperation,
+	}
+	capitalGain.ApplyOperations(operations)
+
+	// Then no tax is charged because the sale proceeds are exactly the threshold
+	taxEvents := capitalGain.Events()
+	assert.Len(t, taxEvents, len(operations))
+
+	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
+	expectedTaxAmounts := []float64{
+		0.00, // buy
+		0.00, // sell (tax-free by threshold)
+	}
+
+	assert.Equal(t, expectedTaxAmounts, taxAmounts)
+}
+
+func TestCapitalGainApplyOperationsGivenTaxFreeLossSaleWhenApplyOperationsThenLossIsCarriedForwardToFutureTaxableProfit(t *testing.T) {
+	t.Parallel()
+
+	// Given I start a new capital gain calculation
+	capitalGain := models.NewCapitalGain()
+
+	// And a buy quantity of 1000
+	buyQuantity := models.NewQuantity(1000)
+
+	// And a buy unit cost of 10.00
+	buyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create a buy operation with the buy quantity and buy unit cost
+	firstBuyOperation := models.NewBuy(buyQuantity, buyUnitCost)
+
+	// And a sell quantity of 1000
+	firstSellQuantity := models.NewQuantity(1000)
+
+	// And a sell unit cost of 5.00 (loss of 5000.00, proceeds below threshold)
+	firstSellUnitCost := models.NewMonetaryValue(5.00)
+
+	// And I create a sell operation with the sell quantity and sell unit cost
+	firstSellOperation := models.NewSell(firstSellQuantity, firstSellUnitCost)
+
+	// And a second buy quantity of 1000
+	secondBuyQuantity := models.NewQuantity(1000)
+
+	// And a second buy unit cost of 10.00
+	secondBuyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create a second buy operation with the second buy quantity and second buy unit cost
+	secondBuyOperation := models.NewBuy(secondBuyQuantity, secondBuyUnitCost)
+
+	// And a second sell quantity of 1000
+	secondSellQuantity := models.NewQuantity(1000)
+
+	// And a second sell unit cost of 40.00 (profit of 30000.00, proceeds above threshold)
+	secondSellUnitCost := models.NewMonetaryValue(40.00)
+
+	// And I create the second sell operation with the second sell quantity and second sell unit cost
+	secondSellOperation := models.NewSell(secondSellQuantity, secondSellUnitCost)
+
+	// When I apply all operations to the capital gain
+	operations := []models.Operation{
+		firstBuyOperation,
+		firstSellOperation,
+		secondBuyOperation,
+		secondSellOperation,
+	}
+	capitalGain.ApplyOperations(operations)
+
+	// Then the tax on the last sell must reflect the carried forward loss:
+	// net profit is 30000.00 - 5000.00 = 25000.00 => tax 20% = 5000.00
+	taxEvents := capitalGain.Events()
+	assert.Len(t, taxEvents, len(operations))
+
+	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
+	expectedTaxAmounts := []float64{
+		0.00,    // first buy
+		0.00,    // first sell (loss, tax-free by threshold)
+		0.00,    // second buy
+		5000.00, // second sell (taxed after loss offset)
+	}
+
+	assert.Equal(t, expectedTaxAmounts, taxAmounts)
+}
+
+func TestCapitalGainApplyOperationsGivenAccumulatedLossThenMultipleTaxFreeProfitSalesWhenApplyOperationsThenLossIsPreservedForFutureTaxableSale(t *testing.T) {
+	t.Parallel()
+
+	// Given I start a new capital gain calculation
+	capitalGain := models.NewCapitalGain()
+
+	// And a buy quantity of 1000
+	buyQuantity := models.NewQuantity(1000)
+
+	// And a buy unit cost of 10.00
+	buyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create a buy operation with the buy quantity and buy unit cost
+	firstBuyOperation := models.NewBuy(buyQuantity, buyUnitCost)
+
+	// And a first sell quantity of 500
+	firstSellQuantity := models.NewQuantity(500)
+
+	// And a first sell unit cost of 5.00 (loss of 2500.00)
+	firstSellUnitCost := models.NewMonetaryValue(5.00)
+
+	// And I create the first sell operation with the first sell quantity and first sell unit cost
+	firstSellOperation := models.NewSell(firstSellQuantity, firstSellUnitCost)
+
+	// And a second sell quantity of 100
+	secondSellQuantity := models.NewQuantity(100)
+
+	// And a second sell unit cost of 15.00 (profit of 500.00, proceeds below threshold)
+	secondSellUnitCost := models.NewMonetaryValue(15.00)
+
+	// And I create the second sell operation with the second sell quantity and second sell unit cost
+	secondSellOperation := models.NewSell(secondSellQuantity, secondSellUnitCost)
+
+	// And a third sell quantity of 400
+	thirdSellQuantity := models.NewQuantity(400)
+
+	// And a third sell unit cost of 15.00 (profit of 2000.00, proceeds below threshold)
+	thirdSellUnitCost := models.NewMonetaryValue(15.00)
+
+	// And I create the third sell operation with the third sell quantity and third sell unit cost
+	thirdSellOperation := models.NewSell(thirdSellQuantity, thirdSellUnitCost)
+
+	// And a second buy quantity of 1000
+	secondBuyQuantity := models.NewQuantity(1000)
+
+	// And a second buy unit cost of 10.00
+	secondBuyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create a second buy operation with the second buy quantity and second buy unit cost
+	secondBuyOperation := models.NewBuy(secondBuyQuantity, secondBuyUnitCost)
+
+	// And a fourth sell quantity of 1000
+	fourthSellQuantity := models.NewQuantity(1000)
+
+	// And a fourth sell unit cost of 30.00 (profit of 20000.00, proceeds above threshold)
+	fourthSellUnitCost := models.NewMonetaryValue(30.00)
+
+	// And I create the fourth sell operation with the fourth sell quantity and fourth sell unit cost
+	fourthSellOperation := models.NewSell(fourthSellQuantity, fourthSellUnitCost)
+
+	// When I apply all operations
+	operations := []models.Operation{
+		firstBuyOperation,
+		firstSellOperation,
+		secondSellOperation,
+		thirdSellOperation,
+		secondBuyOperation,
+		fourthSellOperation,
+	}
+	capitalGain.ApplyOperations(operations)
+
+	// Then the tax in the last sell must reflect the original loss (2500.00),
+	// because tax-free profit sells must not consume accumulated losses:
+	// net profit is 20000.00 - 2500.00 = 17500.00 => tax 20% = 3500.00
+	taxEvents := capitalGain.Events()
+	assert.Len(t, taxEvents, len(operations))
+
+	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
+	expectedTaxAmounts := []float64{
+		0.00,    // first buy
+		0.00,    // first sell (loss)
+		0.00,    // second sell (profit, tax-free by threshold)
+		0.00,    // third sell (profit, tax-free by threshold)
+		0.00,    // second buy
+		3500.00, // fourth sell (taxed, with loss carryforward preserved)
+	}
+
+	assert.Equal(t, expectedTaxAmounts, taxAmounts)
+}
+
+func TestCapitalGainApplyOperationsGivenTaxableSaleWithZeroGainWhenApplyOperationsThenNoTaxIsCharged(t *testing.T) {
+	t.Parallel()
+
+	// Given I start a new capital gain calculation
+	capitalGain := models.NewCapitalGain()
+
+	// And a buy quantity of 2000
+	buyQuantity := models.NewQuantity(2000)
+
+	// And a buy unit cost of 20.00
+	buyUnitCost := models.NewMonetaryValue(20.00)
+
+	// And I create a buy operation with the buy quantity and buy unit cost
+	buyOperation := models.NewBuy(buyQuantity, buyUnitCost)
+
+	// And a sell quantity of 1500
+	sellQuantity := models.NewQuantity(1500)
+
+	// And a sell unit cost of 20.00 (sell at weighted average, proceeds above threshold)
+	sellUnitCost := models.NewMonetaryValue(20.00)
+
+	// And I create a sell operation with the sell quantity and sell unit cost
+	sellOperation := models.NewSell(sellQuantity, sellUnitCost)
+
+	// When I apply the buy and sell operations
+	operations := []models.Operation{
+		buyOperation,
+		sellOperation,
+	}
+	capitalGain.ApplyOperations(operations)
+
+	// Then no tax is charged because the gain is zero
+	taxEvents := capitalGain.Events()
+	assert.Len(t, taxEvents, len(operations))
+
+	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
+	expectedTaxAmounts := []float64{
+		0.00, // buy
+		0.00, // sell at average
+	}
+
+	assert.Equal(t, expectedTaxAmounts, taxAmounts)
+}
+
+func TestCapitalGainApplyOperationsGivenTaxableLossSaleWhenApplyOperationsThenLossIsAccumulatedAndOffsetsFutureTaxableProfit(t *testing.T) {
+	t.Parallel()
+
+	// Given I start a new capital gain calculation
+	capitalGain := models.NewCapitalGain()
+
+	// And a buy quantity of 10000
+	buyQuantity := models.NewQuantity(10000)
+
+	// And a buy unit cost of 5.00
+	buyUnitCost := models.NewMonetaryValue(5.00)
+
+	// And I create a buy operation with the buy quantity and buy unit cost
+	buyOperation := models.NewBuy(buyQuantity, buyUnitCost)
+
+	// And a first sell quantity of 6000
+	firstSellQuantity := models.NewQuantity(6000)
+
+	// And a first sell unit cost of 4.00 (loss of 6000.00, proceeds above threshold)
+	firstSellUnitCost := models.NewMonetaryValue(4.00)
+
+	// And I create the first sell operation with the first sell quantity and first sell unit cost
+	firstSellOperation := models.NewSell(firstSellQuantity, firstSellUnitCost)
+
+	// And a second sell quantity of 4000
+	secondSellQuantity := models.NewQuantity(4000)
+
+	// And a second sell unit cost of 10.00 (profit of 20000.00, proceeds above threshold)
+	secondSellUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create the second sell operation with the second sell quantity and second sell unit cost
+	secondSellOperation := models.NewSell(secondSellQuantity, secondSellUnitCost)
+
+	// When I apply the buy and sell operations
+	operations := []models.Operation{
+		buyOperation,
+		firstSellOperation,
+		secondSellOperation,
+	}
+	capitalGain.ApplyOperations(operations)
+
+	// Then the tax in the second sell must reflect the loss offset:
+	// net profit is 20000.00 - 6000.00 = 14000.00 => tax 20% = 2800.00
+	taxEvents := capitalGain.Events()
+	assert.Len(t, taxEvents, len(operations))
+
+	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
+	expectedTaxAmounts := []float64{
+		0.00,    // buy
+		0.00,    // first sell (loss)
+		2800.00, // second sell (taxed after loss offset)
+	}
+
+	assert.Equal(t, expectedTaxAmounts, taxAmounts)
+}
+
+func TestCapitalGainApplyOperationsGivenLargeAccumulatedLossThenMultipleTaxableProfitSalesWhenApplyOperationsThenLossIsOffsetAcrossSalesUntilExhausted(t *testing.T) {
+	t.Parallel()
+
+	// Given I start a new capital gain calculation
+	capitalGain := models.NewCapitalGain()
+
+	// And a buy quantity of 10000
+	buyQuantity := models.NewQuantity(10000)
+
+	// And a buy unit cost of 10.00
+	buyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create a buy operation with the buy quantity and buy unit cost
+	buyOperation := models.NewBuy(buyQuantity, buyUnitCost)
+
+	// And a first sell quantity of 5000
+	firstSellQuantity := models.NewQuantity(5000)
+
+	// And a first sell unit cost of 5.00 (loss of 25000.00, proceeds above threshold)
+	firstSellUnitCost := models.NewMonetaryValue(5.00)
+
+	// And I create the first sell operation with the first sell quantity and first sell unit cost
+	firstSellOperation := models.NewSell(firstSellQuantity, firstSellUnitCost)
+
+	// And a second sell quantity of 2000
+	secondSellQuantity := models.NewQuantity(2000)
+
+	// And a second sell unit cost of 20.00 (profit of 20000.00, proceeds above threshold)
+	secondSellUnitCost := models.NewMonetaryValue(20.00)
+
+	// And I create the second sell operation with the second sell quantity and second sell unit cost
+	secondSellOperation := models.NewSell(secondSellQuantity, secondSellUnitCost)
+
+	// And a third sell quantity of 1000
+	thirdSellQuantity := models.NewQuantity(1000)
+
+	// And a third sell unit cost of 25.00 (profit of 15000.00, proceeds above threshold)
+	thirdSellUnitCost := models.NewMonetaryValue(25.00)
+
+	// And I create the third sell operation with the third sell quantity and third sell unit cost
+	thirdSellOperation := models.NewSell(thirdSellQuantity, thirdSellUnitCost)
+
+	// When I apply all operations
+	operations := []models.Operation{
+		buyOperation,
+		firstSellOperation,
+		secondSellOperation,
+		thirdSellOperation,
+	}
+	capitalGain.ApplyOperations(operations)
+
+	// Then the accumulated loss must be consumed across multiple taxable profit sells until exhausted:
+	// - second sell profit (20000.00) is fully offset by loss (25000.00) => tax 0.00, remaining loss 5000.00
+	// - third sell profit (15000.00) is partially offset by remaining loss (5000.00) => net 10000.00 => tax 2000.00
+	taxEvents := capitalGain.Events()
+	assert.Len(t, taxEvents, len(operations))
+
+	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
+	expectedTaxAmounts := []float64{
+		0.00,    // buy
+		0.00,    // first sell (loss)
+		0.00,    // second sell (profit fully offset by loss)
+		2000.00, // third sell (taxed after remaining loss offset)
+	}
+
+	assert.Equal(t, expectedTaxAmounts, taxAmounts)
+}
+
+func TestCapitalGainApplyOperationsGivenWeightedAverageCostWithRepeatingDecimalWhenApplyOperationsThenTaxUsesRoundedAverageToTwoDecimals(t *testing.T) {
+	t.Parallel()
+
+	// Given I start a new capital gain calculation
+	capitalGain := models.NewCapitalGain()
+
+	// And a first buy quantity of 1000
+	firstBuyQuantity := models.NewQuantity(1000)
+
+	// And a first buy unit cost of 10.00
+	firstBuyUnitCost := models.NewMonetaryValue(10.00)
+
+	// And I create the first buy operation with the first buy quantity and first buy unit cost
+	firstBuyOperation := models.NewBuy(firstBuyQuantity, firstBuyUnitCost)
+
+	// And a second buy quantity of 2000
+	secondBuyQuantity := models.NewQuantity(2000)
+
+	// And a second buy unit cost of 20.00
+	secondBuyUnitCost := models.NewMonetaryValue(20.00)
+
+	// And I create the second buy operation with the second buy quantity and second buy unit cost
+	secondBuyOperation := models.NewBuy(secondBuyQuantity, secondBuyUnitCost)
+
+	// And a sell quantity of 3000
+	sellQuantity := models.NewQuantity(3000)
+
+	// And a sell unit cost of 30.00 (proceeds above threshold)
+	sellUnitCost := models.NewMonetaryValue(30.00)
+
+	// And I create the sell operation with the sell quantity and sell unit cost
+	sellOperation := models.NewSell(sellQuantity, sellUnitCost)
+
+	// When I apply the operations
+	operations := []models.Operation{
+		firstBuyOperation,
+		secondBuyOperation,
+		sellOperation,
+	}
+	capitalGain.ApplyOperations(operations)
+
+	// Then the tax must be calculated using the weighted average rounded to two decimal places:
+	// wac is (1000*10 + 2000*20) / 3000 = 16.666... => 16.67
+	// profit is (30.00 - 16.67) * 3000 = 39990.00 => tax 20% = 7998.00
+	taxEvents := capitalGain.Events()
+	assert.Len(t, taxEvents, len(operations))
+
+	taxAmounts := test.TaxAmountsFromEvents(taxEvents)
+	expectedTaxAmounts := []float64{
+		0.00,    // first buy
+		0.00,    // second buy
+		7998.00, // sell taxed with rounded weighted average
 	}
 
 	assert.Equal(t, expectedTaxAmounts, taxAmounts)

@@ -1,9 +1,10 @@
 package console
 
 import (
-	"capital-gains/src/driver"
 	"encoding/json"
 	"strings"
+
+	"capital-gains/src/driver"
 )
 
 type OperationsParser struct{}

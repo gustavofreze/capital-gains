@@ -13,7 +13,5 @@ func NewSell(quantity Quantity, unitCost MonetaryValue) Sell {
 }
 
 func (sell Sell) ApplyTo(position *Position) Tax {
-	value := position.Sell(sell.quantity, sell.unitCost)
-
-	return NewTax(value)
+	return position.Sell(sell.quantity, sell.unitCost)
 }

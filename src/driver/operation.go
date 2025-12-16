@@ -1,8 +1,9 @@
 package driver
 
 import (
-	"capital-gains/src/application/commands"
 	"strings"
+
+	"capital-gains/src/application/commands"
 )
 
 const (

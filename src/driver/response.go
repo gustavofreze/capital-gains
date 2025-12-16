@@ -1,8 +1,9 @@
 package driver
 
 import (
-	"capital-gains/src/application/domain/models"
 	"encoding/json"
+
+	"capital-gains/src/application/domain/models"
 )
 
 type Response struct {

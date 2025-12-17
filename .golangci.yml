@@ -1,0 +1,91 @@
+version: "2"
+
+run:
+  tests: true
+  timeout: 3m
+  concurrency: 4
+
+formatters:
+  enable:
+    - gofmt     # Enforces canonical Go formatting.
+    - goimports # Enforces formatting + import grouping.
+  settings:
+    goimports:
+      local-prefixes:
+        - capital-gains
+
+linters:
+  default: none
+  enable:
+    - govet            # Reports suspicious constructs and potential bugs.
+    - gosec            # Detects common security issues in Go code.
+    - unused           # Flags unused variables, constants, and functions.
+    - revive           # Style and best-practices linter (successor of golint).
+    - funlen           # Enforces maximum function length for readability.
+    - cyclop           # Enforces cyclomatic complexity limits (keeps methods simpler).
+    - unparam          # Flags unused function parameters.
+    - goconst          # Finds repeated literals that should be constants.
+    - errcheck         # Detects unchecked errors that can hide real failures.
+    - gocritic         # Opinionated checks for code style, bugs, performance.
+    - depguard         # Restricts which packages can be imported where.
+    - errorlint        # Enforces correct error wrapping/comparisons (errors.Is/As, %w, etc).
+    - staticcheck      # High-signal static analysis (bugs, performance, style checks).
+    - ineffassign      # Detects useless assignments to existing variables.
+    - gochecknoinits   # Forbids use of init() functions.
+    - gochecknoglobals # Flags usage of global variables.
+  settings:
+    funlen:
+      lines: 80
+      statements: 60
+    cyclop:
+      max-complexity: 10
+      package-average: 0.0
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+    depguard:
+      rules:
+        domain-strict: # Protect the domain layer from importing non-domain packages.
+          list-mode: strict
+          files:
+            - "src/application/domain/**"
+            - "!src/application/domain/**_test.go"
+          allow:
+            - $gostd
+            - capital-gains/src/application/domain
+    gocritic:
+      enabled-tags:
+        - style
+        - diagnostic
+        - performance
+    staticcheck:
+      checks:
+        - "all"
+        - "-ST1000"
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - gosec
+          - funlen
+          - gochecknoinits
+          - gochecknoglobals
+    generated: strict
+    warn-unused: false
+
+issues:
+  uniq-by-line: false
+  max-same-issues: 0
+  max-issues-per-linter: 0
+
+output:
+  formats:
+    text:
+      path: stdout
+      colors: true
+      print-linter-name: true
+      print-issued-lines: true

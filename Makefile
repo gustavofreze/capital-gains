@@ -1,9 +1,4 @@
-ifeq ($(OS),Windows_NT)
-    PWD := $(shell cd)
-else
-    PWD := $(shell pwd -L)
-endif
-
+PWD := $(CURDIR)
 ARCH := $(shell uname -m)
 PLATFORM :=
 
@@ -17,9 +12,9 @@ GO_CACHE     := $(PWD)/.cache/go/build
 GO_MOD_CACHE := $(PWD)/.cache/go/pkg/mod
 
 DOCKER_RUN = docker run ${PLATFORM} --rm -t \
-    -v ${PWD}:/app \
-    -v ${GO_MOD_CACHE}:/go/pkg/mod \
-    -v ${GO_CACHE}:/root/.cache/go-build \
+    -v "${PWD}:/app" \
+    -v "${GO_MOD_CACHE}:/go/pkg/mod" \
+    -v "${GO_CACHE}:/root/.cache/go-build" \
     -w /app ${IMAGE} sh -c
 
 .DEFAULT_GOAL := help
@@ -42,7 +37,7 @@ test: ## Run tests with coverage
 .PHONY: review
 review: ## Run static code analysis
 	@docker run ${PLATFORM} --rm -it \
-		-v ${PWD}:/app \
+		-v "${PWD}:/app" \
 		-w /app \
 		golangci/golangci-lint:v2.7-alpine \
 		golangci-lint run ./src/...
@@ -54,9 +49,9 @@ show-reports: ## Open static analysis reports (e.g., coverage, lints) in the bro
 .PHONY: calculate
 calculate: ## Execute the capital gains calculation use case reading operations from stdin (supports input redirection)
 	@docker run ${PLATFORM} --rm -i \
-    	-v ${PWD}:/app \
-    	-v ${GO_MOD_CACHE}:/go/pkg/mod \
-    	-v ${GO_CACHE}:/root/.cache/go-build \
+    	-v "${PWD}:/app" \
+    	-v "${GO_MOD_CACHE}:/go/pkg/mod" \
+    	-v "${GO_CACHE}:/root/.cache/go-build" \
     	-w /app ${IMAGE} sh -c 'go run src/main.go'
 
 .PHONY: clean

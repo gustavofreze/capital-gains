@@ -1,8 +1,8 @@
 package models
 
 const (
-	taxFreeThreshold MonetaryValue = 20000.00
 	taxRate          float64       = 0.20
+	taxFreeThreshold MonetaryValue = 20000.00
 )
 
 type Position struct {

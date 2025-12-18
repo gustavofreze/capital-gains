@@ -5,7 +5,7 @@ import "math"
 type MonetaryValue float64
 
 const (
-	monetaryScale                   = 100.00
+	monetaryScale     float64       = 100.00
 	zeroMonetaryValue MonetaryValue = 0.00
 )
 

@@ -55,12 +55,6 @@ To run the capital gains calculation reading operations from `stdin`, run:
 make calculate < use_case.txt
 ```
 
-With the operations in [use_case.txt](use_case.txt), the result written to `stdout` is:
-
-```json
-[{"tax":0.00},{"tax":80000.00},{"tax":0.00},{"tax":60000.00}]
-```
-
 ### Tests
 
 Run all tests with coverage:

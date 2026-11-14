@@ -6,7 +6,7 @@ ifeq ($(ARCH),arm64)
     PLATFORM := --platform=linux/amd64
 endif
 
-IMAGE = golang:1.25-alpine
+IMAGE = golang:1.27-alpine
 
 GO_CACHE     := $(PWD)/.cache/go/build
 GO_MOD_CACHE := $(PWD)/.cache/go/pkg/mod
@@ -39,7 +39,7 @@ review: ## Run static code analysis
 	@docker run ${PLATFORM} --rm -it \
 		-v "${PWD}:/app" \
 		-w /app \
-		golangci/golangci-lint:v2.7-alpine \
+		golangci/golangci-lint:v2.15-alpine \
 		golangci-lint run ./src/...
 
 .PHONY: show-reports

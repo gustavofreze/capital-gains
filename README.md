@@ -1,9 +1,8 @@
-# Capital gains
-
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+# Capital Gains
 
 * [Overview](#overview)
-    - [Use cases](#use_cases)
+    - [Flow](#flow)
+    - [Use cases](#use-cases)
 * [Installation](#installation)
     - [Repository](#repository)
     - [Configuration](#configuration)
@@ -11,18 +10,20 @@
     - [Review](#review)
     - [Reports](#reports)
 
-<!--suppress HtmlDeprecatedAttribute -->
-
-<div id="overview"></div> 
-
 ## Overview
 
-Command-line (CLI) application that calculates the tax owed on profits or losses from stock market transactions.
+Command-line (CLI) application that calculates the tax owed on profits or losses from stock market operations.
 
-The application processes sequences of buy and sell operations, maintaining an in-memory portfolio with the current
-share quantity, weighted-average unit cost, and accumulated losses.
+The application reads JSON arrays of buy and sell operations from `stdin`, either one array per line or a single array
+spread over several lines, and writes one JSON array of taxes per input array to `stdout`. Each array is processed
+independently, with an in-memory portfolio that keeps the current share quantity, the weighted-average unit cost, and
+the accumulated losses. Nothing is kept between arrays.
 
-<div id='use_cases'></div> 
+### Flow
+
+![Capital gains communication](docs/diagrams/capital-gains-flow.svg)
+
+Sources: [capital-gains-flow.html](docs/diagrams/capital-gains-flow.html).
 
 ### Use cases
 
@@ -30,11 +31,7 @@ share quantity, weighted-average unit cost, and accumulated losses.
 - [Register sell](docs/USE_CASES.md#register-sell)
 - [Calculate capital gain](docs/USE_CASES.md#calculate-capital-gain)
 
-<div id='installation'></div> 
-
 ## Installation
-
-<div id='repository'></div> 
 
 ### Repository
 
@@ -44,8 +41,6 @@ To clone the repository using the command line, run:
 git clone https://github.com/gustavofreze/capital-gains.git
 ```
 
-<div id='configuration'></div> 
-
 ### Configuration
 
 To install project dependencies locally, run:
@@ -54,79 +49,40 @@ To install project dependencies locally, run:
 make configure
 ```
 
-### Execution
-
-Run the CLI reading operations from `stdin` and writing the JSON result to `stdout`:
+To run the capital gains calculation reading operations from `stdin`, run:
 
 ```bash
 make calculate < use_case.txt
 ```
 
-Example use_case.txt:
-
-```json
-[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
-{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
-{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
-{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]
-```
-
-You can also paste input directly:
-
-```bash
-make calculate <<< '[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
-{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
-{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
-{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]'
-```
-
-or
-
-```bash
-make calculate << 'EOF'
-[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
-{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
-{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
-{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]
-EOF
-```
-
-All examples above will produce the same result:
+With the operations in [use_case.txt](use_case.txt), the result written to `stdout` is:
 
 ```json
 [{"tax":0.00},{"tax":80000.00},{"tax":0.00},{"tax":60000.00}]
 ```
-
-For more details, see the [Use cases](docs/USE_CASES.md) documentation.
-
-<div id='tests'></div> 
 
 ### Tests
 
 Run all tests with coverage:
 
 ```bash
-make test 
+make test
 ```
-
-<div id='review'></div> 
 
 ### Review
 
 Run static code analysis:
 
 ```bash
-make review 
+make review
 ```
-
-<div id='reports'></div> 
 
 ### Reports
 
-Open static analysis reports (e.g., coverage, lints) in the browser:
+Open coverage reports in the browser:
 
 ```bash
-make show-reports 
+make show-reports
 ```
 
 > You can check other available commands by running `make help`.

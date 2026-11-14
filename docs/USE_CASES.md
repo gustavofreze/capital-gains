@@ -1,14 +1,12 @@
-* [Register buy](#register_buy)
-* [Register sell](#register_sell)
-* [Calculate capital gain](#calculate_capital_gain)
+* [Register buy](#register-buy)
+* [Register sell](#register-sell)
+* [Calculate capital gain](#calculate-capital-gain)
 * [FAQ](#faq)
 * [Reference](#reference)
 
-<div id='register_buy'></div>
-
 ## Register buy
 
-###### It registers a **buy** operation, updating the portfolio state (share quantity and weighted-average unit cost).
+#### It registers a **buy** operation, updating the portfolio state (share quantity and weighted-average unit cost).
 
 ### Explanation
 
@@ -25,7 +23,7 @@ It increases the current position quantity and recalculates the weighted-average
 | `unit-cost` | Decimal | Unit price paid per share.                   | Positive decimal value (e.g., `10.00`). |   Yes    |
 | `quantity`  | Integer | Number of shares purchased in the operation. | Positive integer (e.g., `1000`).        |   Yes    |
 
-Example as it appears inside an input line:
+Example as it appears inside an input array:
 
 ```json
 [
@@ -48,11 +46,9 @@ Register buy does not generate tax by itself.
 > ```
 
 
-<div id='register_sell'></div>
-
 ## Register sell
 
-###### It registers a **sell** operation, realizing profit or loss and possibly generating tax.
+#### It registers a **sell** operation, realizing profit or loss and possibly generating tax.
 
 ### Explanation
 
@@ -71,7 +67,7 @@ Whether tax is due depends on the exemption threshold and on the final profit af
 | `unit-cost` | Decimal | Unit price received per share (sale price). | Positive decimal value (e.g., `15.00`).              |   Yes    |
 | `quantity`  | Integer | Number of shares sold in the operation.     | Positive integer, not greater than shares available. |   Yes    |
 
-Example as it appears inside an input line:
+Example as it appears inside an input array:
 
 ```json
 [
@@ -100,27 +96,67 @@ Example element:
 }
 ```
 
----
-
-<div id='calculate_capital_gain'></div>
-
 ## Calculate capital gain
 
-###### It reads a list of stock operations from `stdin`, runs an independent simulation per input line, and prints the tax for each operation to `stdout`.
+#### It reads a list of stock operations from `stdin`, runs an independent simulation per input array, and prints the tax for each operation to `stdout`.
+
+**STDIN** `make calculate`
 
 ### Explanation
 
-- The program reads **one JSON array per line** from standard input.
-- Each line is processed as an **independent simulation** (state is not shared across lines).
-- For each input line, the program prints **one JSON array** with the computed `tax` for each operation.
+- The program reads JSON arrays from standard input, either **one array per line** or a **single array** spread over
+  several lines.
+- Each array is processed as an **independent simulation** (state is not shared across arrays).
+- For each input array, the program prints **one JSON array** with the computed `tax` for each operation.
 
 > Common rules (tax logic, threshold, WAC, loss carryforward, rounding) are listed in the [FAQ](#faq).
 
-See [Execution](../README.md#execution) for how to run the program using `make calculate`.
+### Execution
+
+Redirect a file to `stdin`, as with [use_case.txt](../use_case.txt):
+
+```bash
+make calculate < use_case.txt
+```
+
+Example `use_case.txt`:
+
+```json
+[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
+{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]
+```
+
+Or paste the input directly:
+
+```bash
+make calculate <<< '[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
+{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]'
+```
+
+or
+
+```bash
+make calculate << 'EOF'
+[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000},
+{"operation":"buy", "unit-cost":20.00, "quantity": 10000},
+{"operation":"sell", "unit-cost":50.00, "quantity": 10000}]
+EOF
+```
+
+All examples above write the same result to `stdout`:
+
+```json
+[{"tax":0.00},{"tax":80000.00},{"tax":0.00},{"tax":60000.00}]
+```
 
 ### Request
 
-Each input line must be a JSON array where every operation contains the following fields:
+Each input array must be a JSON array where every operation contains the following fields:
 
 | Field       |  Type   | Description                               | Constraints                             | Required |
 |:------------|:-------:|:------------------------------------------|:----------------------------------------|:--------:|
@@ -128,7 +164,7 @@ Each input line must be a JSON array where every operation contains the followin
 | `unit-cost` | Decimal | Unit price per share (2 decimal places).  | Positive decimal value (e.g., `10.00`). |   Yes    |
 | `quantity`  | Integer | Number of shares traded in the operation. | Positive integer (e.g., `1000`).        |   Yes    |
 
-Example (single input line):
+Example (single input array):
 
 ```json
 [
@@ -152,14 +188,14 @@ Example (single input line):
 
 ### Response
 
-For each input line, the program outputs a JSON array with the **same length** as the input operation list.  
+For each input array, the program outputs a JSON array with the **same length** as the input operation list.  
 Each element contains a single field:
 
 | Field |  Type   | Description                              | Constraints                                        | Required |
 |:------|:-------:|:-----------------------------------------|:---------------------------------------------------|:--------:|
 | `tax` | Decimal | Tax amount calculated for the operation. | Decimal value **greater than or equal to** `0.00`. |   Yes    |
 
-Example (output line for the input above):
+Example (output for the input above):
 
 ```json
 [
@@ -174,8 +210,6 @@ Example (output line for the input above):
   }
 ]
 ```
-
-<div id='faq'></div>
 
 ## FAQ
 
@@ -230,8 +264,6 @@ Yes. You may assume input lines follow the contract and will not break parsing.
 ### Can the program print other messages?
 
 No. The program must print only the JSON outputs (no prompts, logs, or explanatory text).
-
-<div id='reference'></div>
 
 ## Reference
 
